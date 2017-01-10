@@ -5,7 +5,7 @@ def is_operator(x):
 
 
 # returns true if x has greater precedence than y
-# ( -> +,- -> /,*
+# order from low to high: (, [+,-], [/,*]
 def x_greater_than_y(x, y):
     if x == y:
         return False
@@ -16,19 +16,6 @@ def x_greater_than_y(x, y):
     elif y == "*" or y == "/":
         return False
     return True
-
-
-# given a list in postfix notation, computes value of equation
-def evaluate_postfix(output_queue):
-    ans_stack = []
-    for tok in output_queue:
-        if is_operator(tok):
-            val1 = ans_stack.pop()
-            val2 = ans_stack.pop()
-            ans_stack.append(operate(val2, val1, tok))
-        else:
-            ans_stack.append(tok)
-    return ans_stack.pop()
 
 
 def operate(num1, num2, op):
@@ -44,14 +31,16 @@ def operate(num1, num2, op):
         return num1 / num2
 
 
+# converts infix string into postfix list
 def infix_to_postfix(infix):
     postfix, op_stack = [], []
     i = 0
     while i < len(infix):
+        print("\t", i, "postfix", postfix, "op_stack", op_stack)
         # read token
         token = infix[i]
-        if token.isnumeric():  # allows multiple digit numbers to be read as a single token
-            while i < len(infix) - 1 and infix[i + 1].isnumeric():
+        if token.isnumeric() or token == ".":  # allows multiple digit numbers and decimals to be read as a single token
+            while i < len(infix) - 1 and (infix[i + 1].isnumeric() or infix[i + 1] == '.'):
                 token += infix[i + 1]
                 i += 1
         # use token
@@ -75,17 +64,32 @@ def infix_to_postfix(infix):
         i += 1
 
     # moves operators from op_stack to postfix
-    while len(op_stack) != 0:
-        x = op_stack.pop()
-        postfix.append(x)
+    postfix.extend(op_stack)
+
     return postfix
 
 
+# given a list in postfix notation, computes value of equation
+def evaluate_postfix(output_queue):
+    ans_stack = []
+    for tok in output_queue:
+        if is_operator(tok):
+            val1 = ans_stack.pop()
+            val2 = ans_stack.pop()
+            ans_stack.append(operate(val2, val1, tok))
+        else:
+            ans_stack.append(tok)
+    return ans_stack.pop()
+
+
 if __name__ == "__main__":
-    # infix = "3+((12)-5)*5"
-    infix = input("Enter equation: ")
-    print("infix", infix)
-    postfix = infix_to_postfix(infix)
-    print("postfix", postfix)
-    ans = evaluate_postfix(postfix)
-    print("answer: ", ans)
+    infix = "(10)/2**3)"
+    # infix = input("Enter equation: ")
+    try:
+        print("infix", infix)
+        postfix = infix_to_postfix(infix)
+        print("\npostfix", postfix)
+        ans = evaluate_postfix(postfix)
+        print("\nanswer: ", ans)
+    except:
+        print("\ninvalid equation")
