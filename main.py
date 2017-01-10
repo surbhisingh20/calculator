@@ -6,16 +6,9 @@ def is_operator(x):
 
 # returns true if x has greater precedence than y
 # order from low to high: (, [+,-], [/,*]
-def x_greater_than_y(x, y):
-    if x == y:
-        return False
-    elif x == "(":
-        return False
-    elif x == "+" or x == "-":
-        return False
-    elif y == "*" or y == "/":
-        return False
-    return True
+precedences = {"(": 0, "+": 1, "-": 1, "/": 2, "*": 2}
+def x_geq_y(x, y):
+    return precedences[x] - precedences[y] >= 0
 
 
 def operate(num1, num2, op):
@@ -55,7 +48,7 @@ def infix_to_postfix(infix):
         elif is_operator(token):
             # adds operators to stack and moves operators on the top of the stack
             # with greater precedence to output queue
-            while len(op_stack) > 0 and x_greater_than_y(op_stack[-1], token):
+            while len(op_stack) > 0 and x_geq_y(op_stack[-1], token):
                 x = op_stack.pop()
                 postfix.append(x)
             op_stack.append(token)
@@ -64,8 +57,9 @@ def infix_to_postfix(infix):
         i += 1
 
     # moves operators from op_stack to postfix
-    postfix.extend(op_stack)
-
+    while len(op_stack) != 0:
+        x = op_stack.pop()
+        postfix.append(x)
     return postfix
 
 
@@ -83,8 +77,7 @@ def evaluate_postfix(output_queue):
 
 
 if __name__ == "__main__":
-    infix = "(10)/2**3)"
-    # infix = input("Enter equation: ")
+    infix = input("Enter equation: ")
     try:
         print("infix", infix)
         postfix = infix_to_postfix(infix)
